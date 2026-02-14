@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
   // Serve the image
   try {
-    const imagePath = path.join(process.cwd(), 'public', 'use-mouse-middle-click-button-windows-thumbnail.jpg');
+    const imagePath = path.join(process.cwd(), 'api', 'use-mouse-middle-click-button-windows-thumbnail.jpg');
     const imageBuffer = fs.readFileSync(imagePath);
     
     res.setHeader('Content-Type', 'image/jpeg');
